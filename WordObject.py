@@ -1,10 +1,11 @@
 from types import *
 import re
+from termcolor import colored
 
 class WordList(object):
     """Key words usable for the redaction of notes"""
     def __init__(self):
-        self.Woli = InstanceWord
+        self.Woli = Word.List
 
     def __repr__(self):
         return str(self.Woli)
@@ -29,10 +30,15 @@ class WordList(object):
             else:
                 pass
         return [False, 0]
-    
+
+
 class Word(object):
+    List = []
+    Indent = ""
+    Column = 0
     def __init__(self, re, verb):
         self.d = {"Re":re, "Verb":verb}
+        Word.List.append(self)
         
     def __getitem__(self, key):
         return self.d[key]
@@ -62,20 +68,51 @@ class Word(object):
         else:
             pass
         return False
+
     
-Chapitre = Word('\\*', True)
-Theoreme = Word('Th', True)
-SousChapitre = Word('(\\*\\*)', False)
+#Specification of display for each individual words defined
+
+Chapitre = Word('\\* ', True)
+def f(self, ligne):
+    Word.Indent = " "
+    ligne = ligne.replace('*', "", 1)
+    ligne = ligne.replace(' ', "", 1)
+    ligne = ligne.upper()
+    ligne = Word.Indent + ligne
+    Word.Indent = "  "
+    return ligne
+Chapitre.Display = MethodType(f, Chapitre)
+
+SousChapitre = Word('\\*\\* ', True)
+def f(self, ligne):
+    Word.Indent = "  "
+    ligne = ligne.replace('*', '', 2)
+    ligne = ligne.replace(' ', "", 1)
+    ligne = ligne.upper()
+    ligne = Word.Indent + ligne
+    Word.Indent = "   "
+    return ligne
+SousChapitre.Display = MethodType(f, SousChapitre)
+
+Theoreme = Word('Th ', True)
+def f(self, ligne):
+    ligne = re.sub(self.d["Re"], "", ligne)
+    Th = colored("Th  ", 'cyan')
+    ligne = Word.Indent + Th + ligne
+    return ligne
+Theoreme.Display = MethodType(f, Theoreme)
+
+Definition = Word('Def ', True)
+def f(self, ligne):
+    ligne = re.sub(self.d["Re"], "", ligne)
+    Def = colored("Def ", 'red')
+    ligne = Word.Indent + Def + ligne
+    return ligne
+Definition.Display = MethodType(f, Definition)
+
 Proposition = Word('Prop|Proposition', False)
 Note = Word('Note', False)
 Corollaire = Word('Cor', False)
 Retour = Word('\\n', False)
 Page = Word('#', False)
-Definition = Word('Def', True)
-
-InstanceWord = [Chapitre, Theoreme, SousChapitre, Proposition,
-                Note, Corollaire, Retour, Page, Definition]
-
-
-
 
