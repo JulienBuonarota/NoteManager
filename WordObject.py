@@ -4,75 +4,74 @@ from termcolor import colored
 
 class WordList(object):
     """Key words usable for the redaction of notes"""
-    def __init__(self):
-        self.Woli = Word.List
-
+    def __init__(self, List):
+        self.d = {}
+        for i in List:
+            tmp = {"Word":i, "Verbose":False}
+            self.d.update({i.__name__():tmp})
+        
+        
     def __repr__(self):
-        return str(self.Woli)
+        return str(self.l)
+
+    def SetVerbose(self, name, verbose):
+        for i in self.d.iterkeys():
+                if i == name:
+                    self.d[i]["Verbose"] = verbose
+                    break
                 
     def Compile(self):
-        for i in self.Woli:
-            i.Compile()
+        for i in self.d.itervalues():
+            i["Word"].Compile()
         
     def Display(self, file):
         with open(file, 'r') as Course:
             s = ""
             for i in Course:
-                a, b = self.Test(i)
-                if a:
-                    s = s + b.Display(i)
+                for j in self.d.itervalues():
+                    if j["Verbose"] and j["Word"].Test(i):
+                        s = s + j["Word"].Display(i)
+                        break
             print s
 
-    def Test(self, ligne):
-        for i in self.Woli:
-            if i.Test(ligne):
-                return [True, i]
-            else:
-                pass
-        return [False, 0]
-
-
 class Word(object):
-    List = []
     Indent = ""
     Column = 0
-    def __init__(self, re, verb):
-        self.d = {"Re":re, "Verb":verb}
-        Word.List.append(self)
-        
-    def __getitem__(self, key):
-        return self.d[key]
-    
-    def __setitem__(self, key, value):
-        self.d[key] = value
+    def __init__(self, re, name, List):
+        self.Re = re
+        self.Name = name
+        List.append(self)
 
+    def __name__(self):
+        return self.Name
+    
     def __repr__(self):
-        return str(self.d)
+        return "re : ", self.Re, " Name : ", self.name
         
     def __str__(self):
-        return str(self.d)
+        return "re : ", self.Re, " Name : ", self.name
 
     def Display(self, ligne):
         #default display
         return ligne
     
     def Compile(self):
-        if type(self.d["Re"]) == StringType:
-            self.d["Re"] = re.compile(self.d["Re"])
+        if type(self.Re) == StringType:
+            self.Re = re.compile(self.Re)
         else:
             pass
         
     def Test(self, ligne):
-        if self.d["Verb"] and self.d["Re"].match(ligne):
+        if self.Re.match(ligne):
             return True
         else:
-            pass
-        return False
+            return False
+
 
     
 #Specification of display for each individual words defined
-
-Chapitre = Word('\\* ', True)
+ListCour = []
+Chapitre = Word('\\* ', "Chapitre", ListCour)
 def f(self, ligne):
     Word.Indent = " "
     ligne = ligne.replace('*', "", 1)
@@ -83,7 +82,7 @@ def f(self, ligne):
     return ligne
 Chapitre.Display = MethodType(f, Chapitre)
 
-SousChapitre = Word('\\*\\* ', True)
+SousChapitre = Word('\\*\\* ', "SousChapitre", ListCour)
 def f(self, ligne):
     Word.Indent = "  "
     ligne = ligne.replace('*', '', 2)
@@ -94,25 +93,25 @@ def f(self, ligne):
     return ligne
 SousChapitre.Display = MethodType(f, SousChapitre)
 
-Theoreme = Word('Th ', True)
+Theoreme = Word('Th ', "Theoreme", ListCour)
 def f(self, ligne):
-    ligne = re.sub(self.d["Re"], "", ligne)
+    ligne = re.sub(self.Re, "", ligne)
     Th = colored("Th  ", 'cyan')
     ligne = Word.Indent + Th + ligne
     return ligne
 Theoreme.Display = MethodType(f, Theoreme)
 
-Definition = Word('Def ', True)
+Definition = Word('Def ', "Definition", ListCour)
 def f(self, ligne):
-    ligne = re.sub(self.d["Re"], "", ligne)
+    ligne = re.sub(self.Re, "", ligne)
     Def = colored("Def ", 'red')
     ligne = Word.Indent + Def + ligne
     return ligne
 Definition.Display = MethodType(f, Definition)
 
-Proposition = Word('Prop|Proposition', False)
-Note = Word('Note', False)
-Corollaire = Word('Cor', False)
-Retour = Word('\\n', False)
-Page = Word('#', False)
+Proposition = Word('Prop|Proposition', "Proposition", ListCour)
+Note = Word('Note', "Note", ListCour)
+Corollaire = Word('Cor', "Corollaire", ListCour)
+Retour = Word('\\n', "Retour", ListCour)
+Page = Word('#', "Page", ListCour)
 
