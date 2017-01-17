@@ -14,6 +14,13 @@ class WordList(object):
     def __repr__(self):
         return str(self.d)
 
+    def __str__(self):
+        s = ""
+        for i in self.d.iteritems():
+            tmp = "{:13} : {:2}".format(i[0], i[1]["Verbose"])
+            s = s + tmp + "\n"
+        return s
+
     def SetVerbose(self, name, verbose):
         for i in self.d.iterkeys():
                 if i == name:
